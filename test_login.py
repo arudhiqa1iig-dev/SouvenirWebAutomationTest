@@ -1,3 +1,4 @@
+import sys
 import time
 from utils.driver_factory import get_driver
 from page.login_page import LoginPage
@@ -6,11 +7,15 @@ from page.carousel_page import CarouselPage
 from page.contact_page import ContactPage
 
 driver = get_driver()
+failed = False
 
 try:
     print("1. Opening Souvenir website")
     driver.get("https://souvenir.edu.np/")
     time.sleep(3)
+
+    assert driver.title.strip() != "", "Homepage title is empty - site may be down"
+    print(f"   Homepage loaded. Title: {driver.title}")
 
     print("2. Testing all navigation links")
     home = HomePage(driver)
@@ -43,11 +48,20 @@ try:
     time.sleep(5)
 
     print("7. Login attempted")
+    assert "login" in driver.current_url.lower(), \
+        "Wrong credentials should NOT log in, but page left the login screen"
+    print(f"   Still on login page as expected: {driver.current_url}")
+
+    print("All checks completed successfully")
 
 except Exception as e:
     print("ERROR OCCURRED ")
     print(e)
+    failed = True
 
 finally:
     print("Closing browser")
     driver.quit()
+
+if failed:
+    sys.exit(1)
