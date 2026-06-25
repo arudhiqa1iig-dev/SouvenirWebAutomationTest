@@ -1,4 +1,4 @@
-name: Daily Selenium Test
+name: Daily Selenium Tests
 
 on:
   schedule:
@@ -7,9 +7,20 @@ on:
     - cron: "15 12 * * *"  # 18:00 Nepal time
   workflow_dispatch:
 
+# Drop the least privilege needed; this job only reads the repo.
+permissions:
+  contents: read
+
+# A new run cancels an in-progress run of the same workflow.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  run-selenium:
+  selenium:
+    name: Run Selenium suite
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -19,19 +30,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
+      # Install Chrome only. ChromeDriver is resolved automatically by
+      # Selenium Manager (built into Selenium 4.6+), which always picks a
+      # driver matching the installed Chrome version. Installing a driver
+      # here would risk a version mismatch.
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          install-chromedriver: true
+          chrome-version: stable
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run login flow test
-        run: python test_login.py
+      - name: Run tests
+        run: pytest
 
-      - name: Run About page test
-        run: python test_about.py
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7

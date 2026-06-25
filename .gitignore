@@ -1,0 +1,51 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ---- Virtual environments ----
+venv/
+.venv/
+env/
+.env/
+ENV/
+virtualenv/
+
+# ---- Environment / secrets ----
+.env
+.env.*
+*.local
+
+# ---- Test / tooling caches ----
+.pytest_cache/
+.cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- Selenium test artifacts ----
+artifacts/
+screenshots/
+*.png
+
+# ---- Large media ----
+*.mp4
+
+# ---- IDE / editor ----
+.idea/
+.vscode/
+*.swp
+*~
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
+
+# ---- Claude Code local files ----
+.claude/
+CLAUDE.md
