@@ -12,8 +12,7 @@ class CarouselPage:
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
 
-    # CORE SAFE CLICK (with JS fallback, since owl arrows are sometimes
-    # covered/overlapping and a normal .click() can get intercepted)
+ 
     def _click_element(self, element, label):
         try:
             self.driver.execute_script(
@@ -57,19 +56,6 @@ class CarouselPage:
         print("\nCarousel navigation test completed.\n")
 
     def click_through_slides(self, total_slides, carousel_index=0, pause=1.0):
-        """
-        Clicks ONLY the right/next arrow (never prev), enough times to step
-        forward through every slide of one specific carousel.
-
-        carousel_index: which .owl-next on the page to use if there's more
-                         than one carousel. 0 = the first one found, which
-                         is normally the main photo slider at the top of
-                         the homepage.
-        total_slides:    how many slides that carousel has (e.g. 11), so we
-                         click next exactly (total_slides - 1) times and
-                         stop on the last slide instead of wrapping back
-                         around to the first.
-        """
         arrows = self.driver.find_elements(*self.NEXT_ARROWS)
         print(f"Found {len(arrows)} owl-next arrow(s) on the page")
 
@@ -77,8 +63,8 @@ class CarouselPage:
             print(f"ERROR: owl-next arrow at index {carousel_index} not found")
             return
 
-        print(f"\nStepping through all {total_slides} slides using only the "
-              f"right arrow...\n")
+        print(f"\nStepping through all slides using only the "
+              f"right arrow\n")
 
         for slide_number in range(2, total_slides + 1):
             arrows = self.driver.find_elements(*self.NEXT_ARROWS)
