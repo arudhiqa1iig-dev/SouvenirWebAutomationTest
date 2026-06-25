@@ -1,7 +1,6 @@
 import os
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 
 
 def get_driver():
@@ -27,13 +26,16 @@ def get_driver():
         "--user-agent=SouvenirWebAutomationTest/1.0 (Selenium monitoring bot)"
     )
 
-    # If CHROMEDRIVER points at a specific driver (set in CI to match the
-    # installed Chrome), use it. Otherwise let Selenium Manager resolve one.
-    chromedriver = os.getenv("CHROMEDRIVER")
-    if chromedriver:
-        driver = webdriver.Chrome(service=Service(chromedriver), options=options)
-    else:
-        driver = webdriver.Chrome(options=options)
+    # If CHROME_BIN is set (in CI), point Selenium at that exact Chrome.
+    # Selenium Manager then downloads a driver matching its version, so the
+    # two can never drift out of sync. Locally, leave it unset and Selenium
+    # finds Chrome on its own.
+    chrome_bin = os.getenv("CHROME_BIN")
+    if chrome_bin:
+        options.binary_location = chrome_bin
 
+    # No Service is passed: Selenium Manager (4.6+) resolves a ChromeDriver
+    # that matches the Chrome above, ignoring any stale driver in PATH.
+    driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(60)
     return driver

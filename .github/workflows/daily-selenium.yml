@@ -34,16 +34,16 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      # Install Chrome AND a matching ChromeDriver from the same action so
-      # their versions always agree. setup-chrome exports CHROMEDRIVER_PATH;
-      # we hand that exact binary to Selenium below (CHROMEDRIVER env), so a
-      # stale driver sitting elsewhere in PATH can never be picked instead.
+      # Install Chrome only. We deliberately DO NOT use this action's
+      # install-chromedriver: it pairs the installed Chrome (149) with a
+      # driver one version ahead (150), which fails. Instead we point
+      # Selenium at this exact Chrome binary (CHROME_BIN below) and let
+      # Selenium Manager download the driver that matches it.
       - name: Set up Chrome
         id: setup-chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
-          install-chromedriver: true
 
       - name: Install dependencies
         run: |
@@ -52,9 +52,10 @@ jobs:
 
       - name: Run tests
         env:
-          # Pin Selenium to the driver setup-chrome just installed, so it
-          # matches the installed Chrome exactly (no PATH-driver mismatch).
-          CHROMEDRIVER: ${{ steps.setup-chrome.outputs.chromedriver-path }}
+          # Point Selenium at the exact Chrome setup-chrome installed.
+          # Selenium Manager reads this binary's version and downloads a
+          # matching driver, so versions can never drift apart.
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: pytest
 
       - name: Upload failure screenshots
