@@ -1,6 +1,7 @@
 import os
 
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 
 
 def get_driver():
@@ -26,6 +27,13 @@ def get_driver():
         "--user-agent=SouvenirWebAutomationTest/1.0 (Selenium monitoring bot)"
     )
 
-    driver = webdriver.Chrome(options=options)
+    # If CHROMEDRIVER points at a specific driver (set in CI to match the
+    # installed Chrome), use it. Otherwise let Selenium Manager resolve one.
+    chromedriver = os.getenv("CHROMEDRIVER")
+    if chromedriver:
+        driver = webdriver.Chrome(service=Service(chromedriver), options=options)
+    else:
+        driver = webdriver.Chrome(options=options)
+
     driver.set_page_load_timeout(60)
     return driver

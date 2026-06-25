@@ -1,6 +1,8 @@
 name: Daily Selenium Tests
 
 on:
+  push:
+    branches: [main]
   schedule:
     # Times are UTC. Nepal is UTC+5:45.
     - cron: "15 0 * * *"   # 06:00 Nepal time
@@ -32,14 +34,16 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      # Install Chrome only. ChromeDriver is resolved automatically by
-      # Selenium Manager (built into Selenium 4.6+), which always picks a
-      # driver matching the installed Chrome version. Installing a driver
-      # here would risk a version mismatch.
+      # Install Chrome AND a matching ChromeDriver from the same action so
+      # their versions always agree. setup-chrome exports CHROMEDRIVER_PATH;
+      # we hand that exact binary to Selenium below (CHROMEDRIVER env), so a
+      # stale driver sitting elsewhere in PATH can never be picked instead.
       - name: Set up Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
+          install-chromedriver: true
 
       - name: Install dependencies
         run: |
@@ -47,6 +51,10 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: Run tests
+        env:
+          # Pin Selenium to the driver setup-chrome just installed, so it
+          # matches the installed Chrome exactly (no PATH-driver mismatch).
+          CHROMEDRIVER: ${{ steps.setup-chrome.outputs.chromedriver-path }}
         run: pytest
 
       - name: Upload failure screenshots
