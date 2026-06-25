@@ -2,8 +2,9 @@ name: Daily Selenium Test
 
 on:
   schedule:
-    - cron: "0 0 * * *"
-    - cron: "0 12 * * *"
+    # Times are UTC. Nepal is UTC+5:45.
+    - cron: "15 0 * * *"   # 06:00 Nepal time
+    - cron: "15 12 * * *"  # 18:00 Nepal time
   workflow_dispatch:
 
 jobs:
@@ -17,12 +18,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.12"
+
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          install-chromedriver: true
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install selenium
+          python -m pip install -r requirements.txt
 
-      - name: Run Selenium test
+      - name: Run login flow test
         run: python test_login.py
+
+      - name: Run About page test
+        run: python test_about.py
