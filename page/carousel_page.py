@@ -74,4 +74,4 @@ class CarouselPage:
             self._click_element(arrows[carousel_index], f"owl-next -> slide {slide_number}")
             time.sleep(pause)
 
-        print(f"\nFinished: reached slide {total_slides}.\n")
+        
