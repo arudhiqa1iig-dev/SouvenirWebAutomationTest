@@ -63,8 +63,6 @@ class CarouselPage:
             print(f"ERROR: owl-next arrow at index {carousel_index} not found")
             return
 
-        print(f"\nStepping through all slides using only the "
-              f"right arrow\n")
 
         for slide_number in range(2, total_slides + 1):
             arrows = self.driver.find_elements(*self.NEXT_ARROWS)
